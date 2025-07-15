@@ -8,7 +8,7 @@ export default function SignupForm() {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/signup", {
+      await axios.post("http://localhost:5000/api/auth/signup", {
         email,
         password,
       });

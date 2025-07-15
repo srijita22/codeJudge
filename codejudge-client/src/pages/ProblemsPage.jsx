@@ -5,13 +5,27 @@ import { Link } from "react-router-dom";
 
 export default function ProblemsPage() {
   const [problems, setProblems] = useState([]);
+useEffect(() => {
+  const fetchProblems = async () => {
+    try {
+      const token = localStorage.getItem("token"); // 🔐 Retrieve token from localStorage
 
-  useEffect(() => {
-    axios
-      .get("http://localhost:5000/api/problems")
-      .then((res) => setProblems(res.data))
-      .catch(() => alert("Failed to fetch problems"));
-  }, []);
+      const res = await axios.get("http://localhost:5000/api/problems", {
+        headers: {
+          Authorization: `Bearer ${token}`, // ✅ Attach token here
+        },
+      });
+
+      setProblems(res.data);
+    } catch (err) {
+      alert("Failed to fetch problems");
+      console.error(err);
+    }
+  };
+
+  fetchProblems();
+}, []);
+
 
   return (
     <div className="problems-page">
