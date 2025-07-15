@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Problem = require("../models/Problem");
+const verifyToken = require("../middleware/auth");
 
 // GET all problems
-router.get("/", async (req, res) => {
+router.get("/",verifyToken ,async (req, res) => {
   try {
     const problems = await Problem.find();
     res.json(problems);

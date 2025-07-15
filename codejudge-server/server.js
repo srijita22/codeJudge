@@ -5,28 +5,38 @@ require("dotenv").config();
 
 const app = express();
 
-// ✅ Add CORS before any routes
+// Middleware
 app.use(cors({
-  origin: "http://localhost:3000",   // Your React frontend
+  origin: "http://localhost:5001",  // React frontend
   credentials: true
 }));
-
 app.use(express.json());
 
-// ✅ Your routes
+// Routes
+const authRoutes = require("./routes/auth");
+const executeRoute = require("./routes/execute");
+const submitRoute = require("./routes/submit");
 const problemRoutes = require("./routes/problems");
-app.use("/api/problems", problemRoutes);
+const verifyToken = require("./middleware/auth");
 
-// ✅ MongoDB connection + server listen
+// Mount routes
+app.use("/api/auth", authRoutes);
+app.use("/api/execute", executeRoute);
+app.use("/api/submit", submitRoute);
+app.use("/api/problems", verifyToken, problemRoutes);  // Protected
+
+// DB + Server Start
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
-}).then(() => {
+})
+.then(() => {
   console.log("✅ MongoDB connected");
   app.listen(5000, () => {
     console.log("🚀 Server running on port 5000");
   });
-}).catch((err) => {
+})
+.catch((err) => {
   console.error("❌ MongoDB connection error:", err);
 });
 
