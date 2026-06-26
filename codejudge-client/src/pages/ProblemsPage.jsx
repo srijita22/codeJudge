@@ -18,7 +18,7 @@ useEffect(() => {
 
       setProblems(res.data);
     } catch (err) {
-      alert("Failed to fetch problems");
+     // alert("Failed to fetch problems");
       console.error(err);
     }
   };
@@ -29,7 +29,7 @@ useEffect(() => {
 
   return (
     <div className="problems-page">
-      <h2>📘 Problem List</h2>
+      <h2> Problem List</h2>
       <table border="1" cellPadding="10">
         <thead>
           <tr>
@@ -38,6 +38,10 @@ useEffect(() => {
           </tr>
         </thead>
         <tbody>
+          <tr>
+            <td>two sum</td>
+            <td>medium</td>
+          </tr>
           {problems.map((p) => (
             <tr key={p._id}>
               <td>

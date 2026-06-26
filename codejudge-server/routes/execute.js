@@ -2,6 +2,7 @@
 const express = require("express");
 const axios = require("axios");
 const router = express.Router();
+const languages=require("../config/languages");
 
 // POST /api/execute
 router.post("/", async (req, res) => {
@@ -12,17 +13,9 @@ router.post("/", async (req, res) => {
   }
 
   // Language ID mapping
-  const languageMap = {
-    cpp: 54,
-    python: 71,
-    java: 62,
-    javascript: 63,
-  };
-
-  const language_id = languageMap[language.toLowerCase()];
-  if (!language_id) {
-    return res.status(400).json({ error: "Unsupported language" });
-  }
+const languageInfo=languages[language.toLowerCase()];
+if(!languageInfo) return res.status(400).json({error:"Unsupported language"});
+const language_id=languageInfo.id;
 
   try {
     const response = await axios.post(

@@ -1,2 +1,241 @@
 0HC3PUproRTSCtwd
 mongodb+srv://srijitadutta025:0HC3PUproRTSCtwd@codej.t0yyah4.mongodb.net/?retryWrites=true&w=majority&appName=codej
+
+const express = require("express");
+const axios   = require("axios");
+const mongoose = require("mongoose");
+const router  = express.Router();
+const Problem = require("../models/Problem"); 
+const languages=require("../config/languages"); 
+const mapStatus=require("../utils/mapStatus") // ← NEW
+
+// POST /api/submit
+router.post("/", async (req, res) => {
+  const { code, language, problemId } = req.body;
+  console.log("✅ /api/submit HIT. problemId:", problemId);
+  const languageInfo=languages[language.toLowerCase()];
+  const language_id=languageInfo.id;
+  if (!languageInfo) return res.status(400).json({ error: "Unsupported language" });
+
+
+  if (!mongoose.Types.ObjectId.isValid(problemId)) {
+    return res.status(400).json({ verdict: "❌ Invalid problemId" });
+  }
+
+  // 1️⃣ Fetch problem by _id from MongoDB
+  const problem = await Problem.findById(problemId).lean();
+  if (!problem) {
+    return res.status(404).json({ verdict: "❌ Problem not found" });
+  }
+
+  // 2️⃣ Loop through test cases
+  for (let i = 0; i < problem.testCases.length; i++) {
+  const test = problem.testCases[i];
+  const input = test.input || "";
+  const expectedOutput = (test.output || "").trim();
+console.log(code);
+console.log("📥 stdin sent to Judge0:", input);
+
+  try {
+    const judgeRes = await axios.post(
+      "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=true&wait=true",
+      {
+        source_code: Buffer.from(code).toString('base64'),
+
+        stdin: Buffer.from(input).toString('base64'),
+        language_id,
+        
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
+          "X-RapidAPI-Key":"413ead16cdmsh0fc7a4edac69d85p11e8f9jsn76315801ca7f",
+        },
+      }
+
+    );
+    console.log("🧾 Judge0 Response:", judgeRes.data);
+if (judgeRes.data.compile_output) {
+  const error = Buffer.from(judgeRes.data.compile_output, 'base64').toString('utf-8');
+  console.error("🔍 Compile error:\n", error);
+}
+
+    const stdout = Buffer.from(judgeRes.data.stdout || "", 'base64').toString('utf-8').trim();
+    const stderr= Buffer.from(judgeRes.data.stderr || "", "base64").toString("utf-8").trim();
+    const verdict=mapStatus(judgeRes.data.status.id);
+const actualOutput = stdout;
+
+ console.log(`🧪 Test ${i + 1}`);
+console.log("🔹 Expected:", JSON.stringify(expectedOutput));
+console.log("🔸 Actual:", JSON.stringify(actualOutput));
+
+    if (actualOutput !== expectedOutput) {
+      return res.json({ verdict: `❌ Wrong Answer on Test ${i + 1}` });
+    }
+   
+
+  } catch (err) {
+    console.error("⚠️ Judge0 error:", err.response?.data || err.message);
+    return res.status(500).json({ verdict: "⚠️ Judge0 error", error: err.message });
+  }
+}
+
+
+  // 3️⃣ All test cases passed
+  res.json({
+    verdict,
+    stdout,
+    stderr,
+   });
+});
+
+module.exports = router;
+
+////////////
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useParams } from "react-router-dom";
+
+export default function ProblemPage() {
+  const { id } = useParams();
+  const [problem, setProblem] = useState(null);
+  const [code, setCode] = useState("");
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState("");
+  const [language, setLanguage] = useState("cpp");
+  const [verdict, setVerdict] = useState("");
+
+  // Fetch problem data on mount
+  useEffect(() => {
+    axios
+      .get(`http://localhost:5000/api/problems/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((res) => setProblem(res.data))
+      .catch((err) => {
+        console.error("❌ Error fetching problem:", err);
+        setProblem({ title: "Unauthorized", description: "You need to login." });
+      });
+  }, [id]);
+
+  // Handle Run with custom input
+  
+ const handleRun = async () => {
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/api/execute",
+      {
+        code,
+        language: language,
+        input,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`
+        }
+      }
+    );
+
+    setOutput(res.data.output || res.data.error || "⚠️ No output returned");
+    
+  } catch (err) {
+    console.error("❌ Error during run:", err);
+    setOutput("❌ Run failed");
+  }
+};
+
+  // Handle Submit (against test cases)
+  const handleSubmit = async () => {
+    try {
+      const res = await axios.post(
+        "http://localhost:5000/api/submit",
+        { code, language, problemId: id },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      // Set output to show stdout/stderr if available
+      const combinedOutput =
+        (res.data.stdout ? `Output:\n${res.data.stdout}\n\n` : "") +
+        (res.data.stderr ? `Error:\n${res.data.stderr}\n\n` : "") +
+        (res.data.error ? `Error:\n${res.data.error}\n\n` : "");
+
+      setOutput(combinedOutput || "");
+      setVerdict(res.data.verdict || "✅ Submitted");
+      alert(res.data.verdict || "✅ Submitted");
+    } catch (err) {
+      console.error("❌ Submission failed:", err);
+      setOutput("");
+      if (err.response) {
+        console.log("📦 Response data:", err.response.data);
+        console.log("📊 Status code:", err.response.status);
+        setVerdict(`❌ Submission failed: ${err.response.status} - ${err.response.data.verdict || "Unknown error"}`);
+        alert(`❌ Submission failed: ${err.response.status} - ${err.response.data.verdict || "Unknown error"}`);
+      } else {
+        setVerdict("❌ Submission failed: No response from server");
+        alert("❌ Submission failed: No response from server");
+      }
+    }
+  };
+
+  return (
+    <div style={{ padding: "20px" }}>
+      {problem ? (
+        <>
+          <h2>{problem.title}</h2>
+          <p>{problem.description}</p>
+
+          <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+            <option value="cpp">C++</option>
+            <option value="python">Python 3</option>
+            <option value="java">Java</option>
+            <option value="javascript">JavaScript</option>
+          </select>
+
+          <h3>Code:</h3>
+          <textarea
+            rows="12"
+            cols="80"
+            placeholder="// Write your code here"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+          />
+          <br />
+
+          <h3>Custom Input (for Run only):</h3>
+          <textarea
+            rows="4"
+            cols="80"
+            placeholder="Enter custom input"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+          />
+          <br />
+
+          <button onClick={handleRun}>Run</button>
+          <button onClick={handleSubmit} style={{ marginLeft: "10px" }}>
+            Submit
+          </button>
+
+          <div className="out">
+            <h3>Output:</h3>
+            <pre>{output}</pre>
+          </div>
+
+          <div className="ver">
+            <h3>Verdict:</h3>
+            <p>{verdict}</p>
+          </div>
+        </>
+      ) : (
+        <p>Loading problem...</p>
+      )}
+    </div>
+  );
+}

@@ -7,7 +7,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:5001",  // React frontend
+  origin: "http://localhost:3000",  // React frontend
   credentials: true
 }));
 app.use(express.json());
@@ -17,26 +17,28 @@ const authRoutes = require("./routes/auth");
 const executeRoute = require("./routes/execute");
 const submitRoute = require("./routes/submit");
 const problemRoutes = require("./routes/problems");
+const submissionRoutes=require("./routes/submissions");
 const verifyToken = require("./middleware/auth");
 
 // Mount routes
 app.use("/api/auth", authRoutes);
 app.use("/api/execute", executeRoute);
 app.use("/api/submit", submitRoute);
+app.use("/api/submissions", submissionRoutes);
 app.use("/api/problems", verifyToken, problemRoutes);  // Protected
 
 // DB + Server Start
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => {
-  console.log("✅ MongoDB connected");
-  app.listen(5000, () => {
-    console.log("🚀 Server running on port 5000");
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("✅ MongoDB connected");
+
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err.message);
   });
-})
-.catch((err) => {
-  console.error("❌ MongoDB connection error:", err);
-});
+
 

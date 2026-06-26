@@ -1,0 +1,161 @@
+
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background-color: rgb(63, 62, 62); /* optional */
+  overflow-x: hidden;
+}
+
+.problem-page{
+    background-color: rgb(64, 63, 63);
+    color: white;
+    height: 100%;
+}
+.problem-page .problem-page-container{
+    display: flex;
+    justify-content: space-around;
+    height: 100%;
+
+}
+.problem-page .column-2{
+    margin-top: 30px;
+    width: 60%;
+    padding: 20px;
+    margin-left: 20px;
+}
+.problem-page .column-1{
+    margin-top: 20px;
+    width: 30%;
+    padding: 20px;
+
+}
+.problem-page .column-1 .question{
+    padding: 20px;
+    height: 550px;
+    border: 1.5px solid white;
+    border-radius: 10px;
+    
+}
+.problem-page .column-2 .input-section{
+    width: 90%;
+    background-color: rgb(244, 240, 240);
+    border-radius: 10px;
+    padding: 10px;
+   
+    
+}
+.problem-page .column-2 button{
+    margin-top: 12px;
+    padding: 8px;
+    font-size: 1rem;
+    background-color: rgb(176, 119, 13);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+
+}
+.problem-page .column-2 #sel{
+    color:  rgb(218, 153, 31);
+    padding: 3px;
+    border: 1.5px solid white;
+}
+
+.problems-page{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+.problems-page table{
+    width: 70%;
+    border: none;
+    background-color: orange;
+}
+.problems-page table tr{
+    border: none;
+}
+.home{
+    display: flex;
+    height: 90vh;
+    align-items: center;
+    justify-content: center;
+}
+.home .hero-section{
+    background-color: black;
+    border-radius: 20px;
+    height: 80vh;
+    width: 90%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}
+.home .hero-section h2{
+    color: rgb(219, 131, 38);
+    font-size: 3rem;
+}
+.home .hero-section .lin{
+    margin-left: 330px;
+    text-decoration: none;
+    background-color:rgb(219, 131, 38) ;
+    padding:0.8rem 2rem 0.8rem 2rem;
+    font-size: 1.5rem;
+    color: white;
+    font-weight: 800;
+    border-radius: 20px;
+
+}
+.inp-container{
+    background-color: rgb(63, 63, 63);
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.inp-form{
+    height: 500px;
+    background-color: rgb(11, 11, 11);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 50%;
+    border-radius: 20px;
+    
+}
+.inp-form .form{
+    display: flex;
+    flex-direction: column;
+    margin: 40px;
+    
+}
+.inp-form .form input{
+    width: 400px;
+    margin-bottom: 50px;
+    padding: 15px;
+    border-radius: 10px;
+}
+.inp-form h2{
+    color: white;
+    margin-top: 0px;
+    font-size: 1.8rem;
+}
+.inp-form .form button{
+    width: 200px;
+    margin-left: 120px;
+    padding: 15px;
+    border-radius: 20px;
+ background-color:rgb(219, 131, 38) ;
+ color: white;
+ font-size: 1rem;
+ font-weight: 700;
+}
+.inp-form p{
+    color: white;
+}
