@@ -3,6 +3,10 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
+import ProblemPanel from "../components/ProblemPanel";
+import EditorPanel from "../components/EditorPanel";
+import BottomPanel from "../components/BottomPanel";
+
 export default function ProblemPage() {
   const { id } = useParams();
   const [problem, setProblem] = useState(null);
@@ -91,74 +95,40 @@ export default function ProblemPage() {
     }
   };
 
-  return (
-    <div className="problem-page" style={{ padding: "20px",
-      
-     }}>
-      {problem ? (
-        <div className="problem-page-container">
-        <div className="column-1">
-          <div className="question">
-          <h2>{problem.title}</h2>
-          <p>{problem.description}</p>
-          </div>
-           <div className="ver">
-            <h3>Verdict:</h3>
-            <p>{verdict}</p>
-          </div>
-        </div>
-        <div className="column-2">
-          <select id="sel" value={language} onChange={(e) => setLanguage(e.target.value)}>
-            <option value="cpp">C++</option>
-            <option value="python">Python 3</option>
-            <option value="java">Java</option>
-            <option value="javascript">JavaScript</option>
-          </select>
-
-
-          <h3>Code:</h3>
-          <textarea
-            className="input-section"
-            rows="15"
-            cols="80"
-            placeholder="// Write your code here"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
+return (
+  <div className="fixed inset-x-0 top-0 bottom-0 bg-background p-4">
+    {problem ? (
+      <div className="grid h-full grid-cols-[40%_60%] gap-4">
+        {/* left panel */}
+        {/* problme panel in components */}
+        <ProblemPanel
+          title={problem.title}
+          difficulty={problem.difficulty}
+          description={problem.description}
+          verdict={verdict}
+        />
+        {/* right panel */}
+        <div className="grid h-full grid-rows-[1fr_220px] gap-4">
+          {/* has top bar and code editor */}
+          <EditorPanel
+            language={language}
+            setLanguage={setLanguage}
+            code={code}
+            setCode={setCode}
+            handleRun={handleRun}
+            handleSubmit={handleSubmit}
+            navigate={navigate}
+            verdict={verdict}
           />
-          <br />
-
-          <h3>Custom Input (for Run only):</h3>
-          <textarea
-            className="input-section"
-            rows="4"
-            cols="80"
-            placeholder="Enter custom input"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
-          <br />
-
-          <button onClick={handleRun}>Run</button>
-          <button onClick={handleSubmit} style={{ marginLeft: "10px" }}>
-            Submit
-          </button>
-          <button
-            onClick={() => navigate("/my-submissions")}
-            style={{ marginLeft: "10px" }}
-          >
-  My Submissions
-</button>
-
-          <div className="out">
-            <h3>Output:</h3>
-            <pre>{output}</pre>
-          </div>
+          {/* has input and output */}
+          <BottomPanel input={input} setInput={setInput} output={output} />
         </div>
-         
-        </div>
-      ) : (
-        <p>Loading problem...</p>
-      )}
-    </div>
-  );
+      </div>
+    ) : (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-secondaryText text-xl">Loading Problem.</p>
+      </div>
+    )}
+  </div>
+);
 }

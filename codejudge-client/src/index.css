@@ -1,12 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-
-html, body, #root {
-  margin: 0;
-  padding: 0;
+html,
+body,
+#root {
   height: 100%;
-  width: 100%;
-  background-color: rgb(63, 62, 62); /* optional */
-  overflow-x: hidden;
+  margin: 0;
+  background: #0F172A;
 }
 
 .problem-page{
